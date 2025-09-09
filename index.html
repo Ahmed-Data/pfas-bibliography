@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zotero PFAS Bibliography</title>
+  <!-- DataTables CSS/JS via CDN -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; }
+    h1 { margin-bottom: 0.25rem; }
+    .sub { color:#555; margin:0 0 1rem 0; }
+    table.dataTable thead th { white-space: nowrap; }
+    td.wrap { white-space: normal; }
+    .controls { margin: 1rem 0; }
+    .controls input { padding: 0.5rem; width: 320px; }
+  </style>
+</head>
+<body>
+  <h1>PFAS / WRRF Reference Database</h1>
+  <p class="sub">Searchable, filterable public database built from Zotero export.</p>
+
+  <div class="controls">
+    <input id="globalSearch" type="search" placeholder="🔎 Global search (title, author, DOI, abstract, ...)" />
+  </div>
+
+  <table id="refs" class="display" style="width:100%">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Authors</th>
+        <th>Year</th>
+        <th>Journal</th>
+        <th>DOI</th>
+        <th>URL</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function main() {
+      const resp = await fetch('data.json');
+      const data = await resp.json();
+      const table = $('#refs').DataTable({
+        data: data,
+        deferRender: true,
+        pageLength: 25,
+        order: [[2, 'desc']],
+        columns: [
+          { data: 'Title', render: (d,_,row) => d ? d : '' },
+          { data: 'Authors' },
+          { data: 'Year' },
+          { data: 'ContainerTitle' },
+          { data: 'DOI', render: d => d ? `<a href="https://doi.org/${d}" target="_blank" rel="noopener">${d}</a>` : '' },
+          { data: 'URL', render: d => d ? `<a href="${d}" target="_blank" rel="noopener">Link</a>` : '' },
+          { data: 'Type' }
+        ]
+      });
+      // Global search
+      $('#globalSearch').on('keyup change', function() { table.search(this.value).draw(); });
+    }
+    main();
+  </script>
+</body>
+</html>
